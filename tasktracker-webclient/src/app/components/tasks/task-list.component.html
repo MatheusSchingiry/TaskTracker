@@ -1,0 +1,71 @@
+<div class="page">
+  <div class="topbar">
+    <h1 class="page-title">Todas as Tasks</h1>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span>Título</span>
+      <span>Descrição</span>
+      <span>Projeto</span>
+      <span>Status</span>
+      <span>Criado em</span>
+      <span>Ações</span>
+    </div>
+
+    <div *ngIf="loading" class="empty-state">Carregando...</div>
+    <div *ngIf="!loading && tasks.length === 0" class="empty-state">Nenhuma task cadastrada.</div>
+
+    <div class="task-row" *ngFor="let task of tasks">
+      <div class="task-name">{{ task.title }}</div>
+      <div class="task-desc-col">
+        <span *ngIf="task.description; else noDesc">{{ task.description }}</span>
+        <ng-template #noDesc><span class="no-desc">—</span></ng-template>
+      </div>
+      <div class="proj-ref">{{ task.projectName }}</div>
+      <div><span class="badge" [ngClass]="badgeClass(task.status)">{{ statusLabel(task.status) }}</span></div>
+      <div class="date-col">{{ task.createdAt | date:'dd/MM/yyyy' }}</div>
+      <div class="task-actions">
+        <button class="action-btn" (click)="openEditTaskModal(task)">Editar</button>
+        <button class="action-btn del" (click)="deleteTask(task)">Excluir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Editar Task -->
+<div class="modal-overlay" [class.open]="showTaskModal" (click)="showTaskModal = false">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">Editar task</h2>
+      <button class="modal-close" (click)="showTaskModal = false">✕</button>
+    </div>
+    <div class="modal-project-label" *ngIf="editingTask">
+      Projeto: {{ editingTask.projectName }}
+    </div>
+
+    <form [formGroup]="taskForm" (ngSubmit)="saveTask()">
+      <div class="form-group">
+        <label class="form-label">Título <span class="required">*</span></label>
+        <input class="form-input" type="text" formControlName="title" placeholder="Ex: Implementar autenticação JWT" />
+        <div class="form-error" *ngIf="taskForm.get('title')?.invalid && taskForm.get('title')?.touched">
+          Título é obrigatório.
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição</label>
+        <textarea class="form-textarea" formControlName="description" placeholder="Detalhes da task..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" formControlName="status">
+          <option *ngFor="let opt of taskStatusOptions" [value]="opt.value">{{ opt.label }}</option>
+        </select>
+      </div>
+      <div class="form-footer">
+        <button type="button" class="btn-cancel" (click)="showTaskModal = false">Cancelar</button>
+        <button type="submit" class="btn-primary" [disabled]="taskForm.invalid">Salvar alterações</button>
+      </div>
+    </form>
+  </div>
+</div>
