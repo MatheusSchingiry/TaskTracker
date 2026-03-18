@@ -1,0 +1,191 @@
+<div class="page">
+
+  <div class="topbar">
+    <h1 class="page-title">Projetos</h1>
+    <div class="search-wrap">
+      <span class="icon">🔍</span>
+      <input
+        type="text"
+        placeholder="Buscar por nome..."
+        [value]="searchTerm"
+        (input)="onSearch($any($event.target).value)"
+      />
+    </div>
+    <button class="btn-primary" (click)="openCreateModal()">+ Novo Projeto</button>
+  </div>
+
+  <div class="status-tabs">
+    <button class="tab" [class.active]="activeStatusFilter === 'ALL'" (click)="setStatusFilter('ALL')">
+      Todos
+    </button>
+    <button
+      *ngFor="let opt of projectStatusOptions"
+      class="tab"
+      [class.active]="activeStatusFilter === opt.value"
+      (click)="setStatusFilter(opt.value)"
+    >{{ opt.label }}</button>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span>Projeto</span>
+      <span>Status</span>
+      <span>Tecnologias</span>
+      <span>Criado em</span>
+      <span>Ações</span>
+    </div>
+
+    <div *ngIf="filteredProjects.length === 0" class="empty-state">
+      Nenhum projeto encontrado.
+    </div>
+
+    <div class="proj-row" *ngFor="let project of filteredProjects">
+
+      <div class="proj-main" (click)="toggleExpand(project.id!)">
+        <div>
+          <div class="proj-name">{{ project.name }}</div>
+          <div *ngIf="project.description" class="proj-desc">{{ project.description }}</div>
+        </div>
+        <div>
+          <span class="badge" [ngClass]="badgeClass(project.status)">
+            {{ statusLabel(project.status) }}
+          </span>
+        </div>
+        <div class="tech-tags">
+          <span class="tech-tag" *ngFor="let tech of techList(project.technology)">{{ tech }}</span>
+        </div>
+        <div class="date-col">{{ project.createdAt | date:'dd/MM/yyyy' }}</div>
+        <div class="row-actions">
+          <button
+            class="expand-btn"
+            [class.open]="isExpanded(project.id!)"
+            (click)="$event.stopPropagation(); toggleExpand(project.id!)"
+          >{{ isExpanded(project.id!) ? '▲' : '▼' }}</button>
+          <button class="action-btn" (click)="$event.stopPropagation(); openEditModal(project)">Editar</button>
+          <button class="action-btn del" (click)="$event.stopPropagation(); deleteProject(project.id!)">Excluir</button>
+        </div>
+      </div>
+
+      <div class="tasks-panel" [class.open]="isExpanded(project.id!)">
+        <div class="tasks-inner">
+
+          <div class="tasks-header">
+            <span>Tasks do projeto</span>
+            <button class="btn-add-task" (click)="openAddTaskModal(project)">+ Adicionar task</button>
+          </div>
+
+          <div class="task-cols-header" *ngIf="projectTasks[project.id!]?.length">
+            <span>Título</span>
+            <span>Descrição</span>
+            <span>Status</span>
+            <span>Criado em</span>
+            <span>Ações</span>
+          </div>
+
+          <div *ngIf="!projectTasks[project.id!] || projectTasks[project.id!].length === 0" class="tasks-empty">
+            Nenhuma task cadastrada.
+          </div>
+
+          <div class="task-row" *ngFor="let task of projectTasks[project.id!]">
+            <div class="task-name">{{ task.title }}</div>
+            <div class="task-desc-col">
+              <span *ngIf="task.description; else noDesc">{{ task.description }}</span>
+              <ng-template #noDesc><span class="no-desc">—</span></ng-template>
+            </div>
+            <div>
+              <span class="badge" [ngClass]="badgeClass(task.status)">{{ statusLabel(task.status) }}</span>
+            </div>
+            <div class="date-col">{{ task.createdAt | date:'dd/MM/yyyy' }}</div>
+            <div class="task-actions">
+              <button
+                class="action-btn"
+                (click)="openEditTaskModal(project.id!, project.name, task)"
+              >Editar</button>
+              <button
+                class="action-btn del"
+                (click)="deleteTask(project.id!, task.id!)"
+              >Excluir</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" [class.open]="showProjectModal" (click)="showProjectModal = false">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">{{ editingProject ? 'Editar projeto' : 'Criar novo projeto' }}</h2>
+      <button class="modal-close" (click)="showProjectModal = false">✕</button>
+    </div>
+
+    <form [formGroup]="projectForm" (ngSubmit)="saveProject()">
+      <div class="form-group">
+        <label class="form-label">Nome <span class="required">*</span></label>
+        <input class="form-input" type="text" formControlName="name" placeholder="Ex: Backend API v2" />
+        <div class="form-error" *ngIf="projectForm.get('name')?.invalid && projectForm.get('name')?.touched">
+          Nome é obrigatório.
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição</label>
+        <textarea class="form-textarea" formControlName="description" placeholder="Descrição do projeto..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tecnologias</label>
+        <input class="form-input" type="text" formControlName="technology" placeholder="Java, Spring Boot, PostgreSQL" />
+        <div class="form-hint">Separe por vírgula</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" formControlName="status">
+          <option *ngFor="let opt of projectStatusOptions" [value]="opt.value">{{ opt.label }}</option>
+        </select>
+      </div>
+      <div class="form-footer">
+        <button type="button" class="btn-cancel" (click)="showProjectModal = false">Cancelar</button>
+        <button type="submit" class="btn-primary" [disabled]="projectForm.invalid">
+          {{ editingProject ? 'Salvar alterações' : 'Criar projeto' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" [class.open]="showTaskModal" (click)="showTaskModal = false">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">{{ editingTask ? 'Editar task' : 'Adicionar task' }}</h2>
+      <button class="modal-close" (click)="showTaskModal = false">✕</button>
+    </div>
+    <div class="modal-project-label">Projeto: {{ selectedProjectName }}</div>
+
+    <form [formGroup]="taskForm" (ngSubmit)="saveTask()">
+      <div class="form-group">
+        <label class="form-label">Título <span class="required">*</span></label>
+        <input class="form-input" type="text" formControlName="title" placeholder="Ex: Implementar autenticação JWT" />
+        <div class="form-error" *ngIf="taskForm.get('title')?.invalid && taskForm.get('title')?.touched">
+          Título é obrigatório.
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição</label>
+        <textarea class="form-textarea" formControlName="description" placeholder="Detalhes da task..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" formControlName="status">
+          <option *ngFor="let opt of taskStatusOptions" [value]="opt.value">{{ opt.label }}</option>
+        </select>
+      </div>
+      <div class="form-footer">
+        <button type="button" class="btn-cancel" (click)="showTaskModal = false">Cancelar</button>
+        <button type="submit" class="btn-primary" [disabled]="taskForm.invalid">
+          {{ editingTask ? 'Salvar alterações' : 'Adicionar task' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
