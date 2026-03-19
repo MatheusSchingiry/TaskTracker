@@ -34,8 +34,11 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+    public List<Task> getAllTasks(Long projectId) {
+        return taskRepository.findAll()
+                .stream()
+                .filter(t -> t.getProject().getId().equals(projectId))
+                .toList();
     }
 
     public Task getTasksByName(Long projectId, String name) {

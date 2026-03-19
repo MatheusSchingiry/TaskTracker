@@ -9,6 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
+@CrossOrigin(origins = "*")
 public class ProjectController {
 
     private final ProjectService projectService;

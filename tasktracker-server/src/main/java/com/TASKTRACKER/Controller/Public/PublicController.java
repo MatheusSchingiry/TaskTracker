@@ -10,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/public")
+@CrossOrigin(origins = "*")
 public class PublicController {
 
     private final ProjectService projectService;

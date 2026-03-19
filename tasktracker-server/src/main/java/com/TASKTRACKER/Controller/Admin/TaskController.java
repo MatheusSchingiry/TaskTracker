@@ -9,6 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
+@CrossOrigin(origins = "*")
 public class TaskController {
 
     private final TaskService taskService;
@@ -24,7 +25,7 @@ public class TaskController {
 
     @GetMapping("/{projectId}/task/read")
     public List<Task> getAllTask(@PathVariable Long projectId) {
-        return taskService.getAllTasks();
+        return taskService.getAllTasks(projectId);
     }
 
     @GetMapping("/{projectId}/task/readByName")
