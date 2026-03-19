@@ -6,11 +6,26 @@
 
 ---
 
+## ⚠️ Aviso — Estado Atual do Projeto
+
+> **Esta é a primeira versão do TaskTracker e o projeto ainda está em desenvolvimento ativo, sem previsão de conclusão.**
+
+Antes de utilizar ou contribuir, esteja ciente das seguintes limitações atuais:
+
+- 🔴 **Sem autenticação** — não há nenhum módulo de autenticação implementado. Os endpoints `/admin` estão acessíveis sem qualquer validação de credencial
+- 🔴 **Sem validação de credenciais** — qualquer requisição às rotas administrativas é aceita sem verificação de identidade
+- 🟡 **Execução apenas local** — o sistema ainda não possui ambiente de produção configurado. É necessário rodar todos os serviços (servidor, banco de dados e cache) localmente na própria máquina
+- 🟡 **Em constante atualização** — funcionalidades, endpoints e estrutura de dados podem sofrer alterações sem aviso prévio
+
+Estas limitações são conhecidas e fazem parte do roadmap de evolução do projeto.
+
+---
+
 ## Visão Geral
 
 O TaskTracker é um sistema completo para gerenciamento de projetos e tarefas, construído sobre dois pilares principais:
 
-**Terminal Linux** — Interface CLI inicializada automaticamente junto ao sitema via systemd, com layout visual em ASCII Art, cores ANSI e auto-refresh a cada 30 segundos.
+**Terminal Linux** — Interface CLI inicializada automaticamente junto ao sistema via systemd, com layout visual em ASCII Art, cores ANSI e auto-refresh a cada 30 segundos.
 
 **Interface Web** — Frontend em TypeScript/Angular com formulários de criação, listagem com filtros, busca por nome e endpoints separados para Admin e Public.
 
@@ -186,6 +201,8 @@ mvn exec:java
 
 A API é dividida em dois grupos: **Admin** (leitura e escrita) e **Public** (somente leitura, sem autenticação).
 
+> ⚠️ **Atenção:** Nenhum dos endpoints possui autenticação ou proteção de acesso no momento.
+
 ### Admin — Projetos
 
 | Método | Endpoint | Descrição |
@@ -314,4 +331,4 @@ A CLI é exibida com banner ASCII Art, tabela formatada e cores ANSI por status:
 
 ---
 
-*TaskTracker — Especificação Técnica v1.0 · Março 2026*
+*TaskTracker v1.0 · Primeira versão · Em desenvolvimento · Março 2026*
