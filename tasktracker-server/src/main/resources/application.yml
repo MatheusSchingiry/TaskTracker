@@ -22,3 +22,10 @@ spring:
     redis:
       time-to-live: 300000
       cache-null-values: false
+
+  springdoc:
+    swagger-ui:
+      path: /api/swagger-ui.html
+      enabled: true
+    api-docs:
+      path: /api/v1/api-docs
